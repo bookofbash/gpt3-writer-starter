@@ -6,6 +6,7 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 const basePromptPrefix = "Write the following sentence in  5 various tones of voice and style. Use proper grammar. Create a new line before each example.";
+
 const generateAction = async (req, res) => {
    console.log(`API: ${basePromptPrefix}${req.body.userInput}`)
 
