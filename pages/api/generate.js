@@ -11,7 +11,7 @@ const generateAction = async (req, res) => {
    console.log(`API: ${basePromptPrefix}${req.body.userInput}`)
 
   const baseCompletion = await openai.createCompletion({
-    model: 'gpt-3.5-turbo',
+    model: 'text-davinci-003',
     prompt: `${basePromptPrefix}${req.body.userInput}\n`,
     temperature: 0.4,
     max_tokens: 250,
