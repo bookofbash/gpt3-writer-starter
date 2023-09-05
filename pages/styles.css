@@ -120,6 +120,9 @@ h1 span {
 
 textarea {
     font-family: 'Manrope', sans-serif;
+    height: 80px;
+    background-color: inherit;
+    border: none;
 }
 
 
@@ -326,16 +329,12 @@ textarea {
     flex-shrink: 0;
     transform: none;
     color: black;
+    width: inherit;
     
     
 }
 
-.output-content p {
-    text-align: left;
-    white-space: pre-line;
-    color: black;
-    line-height: 1.6;
-}
+
 
 @media (min-width: 810px) and (max-width: 1199px) {
     .container {
