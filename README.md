@@ -1,3 +1,3 @@
-# buildspace 
+# WordWeave 
 ### Welcome 👋
-This is the starter template for the [build your own AI writing assistant w/ GPT-3](https://buildspace.so/builds/ai-writer) project.
+WordWeave started as a fork from the Buildspace project. [build your own AI writing assistant w/ GPT-3](https://buildspace.so/builds/ai-writer) project.
