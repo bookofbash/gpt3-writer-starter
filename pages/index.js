@@ -1,6 +1,4 @@
 import Head from 'next/head';
-import Image from 'next/image';
-import buildspaceLogo from '../assets/buildspace-logo.png';
 import 'material-icons/iconfont/material-icons.css';
 import {useState, useEffect, useRef} from 'react';
 
