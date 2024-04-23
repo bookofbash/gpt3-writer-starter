@@ -1,9 +1,8 @@
 import Head from 'next/head';
 import 'material-icons/iconfont/material-icons.css';
-import {useState, useEffect, useRef} from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-const OutputLine = ({ line }) => {
-  const cleanedLine = line.replace(/^\d+\.\s*/, '');
+const OutputLine = ({ item }) => {
   const textAreaRef = useRef(null);
 
   useEffect(() => {
@@ -12,21 +11,21 @@ const OutputLine = ({ line }) => {
       textArea.style.height = 'auto';
       textArea.style.height = `${textArea.scrollHeight}px`;
     }
-  }, [cleanedLine]);
+  }, [item.message]);
 
   return (
-    cleanedLine.trim() !== '' && (
+    item.message.trim() !== '' && (
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-        <textarea 
+        <textarea
           ref={textAreaRef}
-          value={cleanedLine} 
-          style={{ flex: 1, resize: 'none', overflowY: 'auto' }} 
-          readOnly 
+          value={`${item.tone}: ${item.message}`}
+          style={{ flex: 1, resize: 'none', overflowY: 'auto' }}
+          readOnly
         />
-        <i 
-          className="material-icons" 
-          style={{ cursor: 'pointer' }} 
-          onClick={() => navigator.clipboard.writeText(cleanedLine)}
+        <i
+          className="material-icons"
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigator.clipboard.writeText(`${item.tone}: ${item.message}`)}
         >
           content_copy
         </i>
@@ -35,31 +34,39 @@ const OutputLine = ({ line }) => {
   );
 };
 
+
 // ... your existing Home component code
 const Home = () => {
   const [userInput, setUserInput] = useState('');
-  const [apiOutput, setApiOutput] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
-  
+  const [apiOutput, setApiOutput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const callGenerateEndpoint = async () => {
     setIsGenerating(true);
-    
-    console.log("Calling OpenAI...")
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userInput }),
-    });
-    const data = await response.json();
-    const { output } = data;
-    console.log("OpenAI replied...", output.text)
-  
-    setApiOutput(`${output.text}`);
-    setIsGenerating(false);
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userInput }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch data');
+      }
+      setApiOutput(data.outputs); // Update this to match the expected structure from the backend
+      console.log("Output: ", data.outputs);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setApiOutput([]); // Ensure this is an empty array to handle mapping in render
+    } finally {
+      setIsGenerating(false);
+    }
   }
-  
+
+
+
   const onUserChangedText = (event) => {
     setUserInput(event.target.value);
   }
@@ -78,35 +85,34 @@ const Home = () => {
           </div>
         </div>
         <div className="prompt-container">
-          <textarea 
-          placeholder="start typing here" 
-          className="prompt-box"
-          value={userInput}
-          onChange={onUserChangedText} />
-          <div className= "prompt-buttons">
-            <a 
-            className={isGenerating ? 'generate-button loading' : 'generate-button'}  
-            onClick={callGenerateEndpoint}
+          <textarea
+            placeholder="start typing here"
+            className="prompt-box"
+            value={userInput}
+            onChange={onUserChangedText} />
+          <div className="prompt-buttons">
+            <button
+              className={isGenerating ? 'generate-button loading' : 'generate-button'}
+              onClick={callGenerateEndpoint}
+              disabled={isGenerating}
             >
-              <div className="generate">
               {isGenerating ? <span className="loader"></span> : <p>Generate</p>}
-              </div>
-            </a>
+            </button>
           </div>
           {apiOutput && (
-  <div className="output">
-    <div className="output-header-container">
-      <div className="output-header">
-        <h3>Try these!</h3>
-      </div>
-    </div>
-    <div className="output-content">
-      {apiOutput.trim().split('\n').map((line, index) => (
-        <OutputLine key={index} line={line} />
-      ))}
-    </div>
-  </div>
-)}
+            <div className="output">
+              <div className="output-header-container">
+                <div className="output-header">
+                  <h3>Try these!</h3>
+                </div>
+              </div>
+              <div className="output-content">
+                {apiOutput.map((item, index) => (
+                  <OutputLine key={index} item={item} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
