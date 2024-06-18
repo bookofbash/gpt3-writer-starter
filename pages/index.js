@@ -43,27 +43,52 @@ const Home = () => {
 
   const callGenerateEndpoint = async () => {
     setIsGenerating(true);
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userInput }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch data');
+    
+    let apiOutput = []; // Initialize apiOutput
+  
+    // Attempt to make the API call up to 3 times
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const responsePromise = fetch('/api/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userInput }),
+        });
+  
+        // Use Promise.race to add a timeout of 10 seconds
+        const timeoutPromise = new Promise((resolve, reject) => {
+          setTimeout(() => reject(new Error('Timeout occurred')), 10000);
+        });
+  
+        // Wait for either the fetch response or the timeout
+        const response = await Promise.race([responsePromise, timeoutPromise]);
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+  
+        const data = await response.json();
+        setApiOutput(data.outputs); // Update this to match the expected structure from the backend
+        console.log("Output: ", data.outputs);
+        break; // Exit the loop if successful response
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        apiOutput = []; // Ensure this is an empty array to handle mapping in render
       }
-      setApiOutput(data.outputs); // Update this to match the expected structure from the backend
-      console.log("Output: ", data.outputs);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setApiOutput([]); // Ensure this is an empty array to handle mapping in render
-    } finally {
-      setIsGenerating(false);
     }
-  }
+  
+    // After attempting 3 times, if apiOutput is still empty, display error message
+    if (apiOutput.length === 0) {
+      console.log("We're making too many API calls at the moment.");
+      // Handle your UI or error state as needed
+      apiOutput="We're making too many API calls at the moment."
+    }
+  
+    setIsGenerating(false);
+  };
+  
 
 
 
